@@ -71,17 +71,23 @@ get_pal <- function(palette_list) {
 #'
 #' @examples
 #' # devtools::install_github("RopenScilabs/ochRe")
+#' # devtools::install_github("EdwinTh/dutchmasters")
 #' library(ggplot2)
 #'
 #' ochRe_pal <- get_pal(ochRe::ochre_palettes)
 #' scale_colour_ochRe <- get_scale_colour(ochRe::ochre_palettes,
 #'                                       ochRe_pal)
+#'
+#' dutchmasters_pal <- get_pal(dutchmasters::dutchmasters)
+#' scale_fill_dutchmasters <- get_fill_colour(dutchmasters::dutchmasters,
+#'                                            dutchmasters_pal)
+#'
 #' ggplot(mtcars, aes(mpg, wt)) +
 #'   geom_point(aes(colour = factor(cyl)), size = 4) +
 #'   scale_colour_ochRe()
 #' ggplot(mtcars, aes(mpg, wt)) +
 #'   geom_point(aes(colour = hp)) +
-#'   scale_colour_dutchmasters(palette="pearl_earring", discrete = FALSE)
+#'   scale_colour_ochRe(palette = "lorikeet", discrete = FALSE)
 #' ggplot(data = mpg) +
 #'   geom_point(mapping = aes(x = displ, y = hwy, color = class)) +
 #'   scale_colour_dutchmasters(palette="view_of_Delft")
@@ -92,6 +98,8 @@ get_pal <- function(palette_list) {
 #' @importFrom ggplot2 discrete_scale scale_color_gradientn
 get_scale_color <- function(palette_list,
                             pal_object) {
+  check_valid_list(palette_list)
+  check_valid_color_list(palette_list)
 
   function(...,
            palette  = NULL,
@@ -115,16 +123,13 @@ get_scale_color <- function(palette_list,
 }
 
 get_scale_colour <- get_scale_color
-
 #' @rdname scale_color_dutchmasters
-#' @export
-scale_colour_dutchmasters <- scale_color_dutchmasters
+
 
 #' Setup fill palette for ggplot2
 #'
 #' @param palette Choose from 'dutchmasters_palettes' list
 #'
-#' @inheritParams viridis::scale_fill_viridis
 #' @inheritParams dutchmasters_pal
 #'
 #' @param discrete whether to use a discrete colour palette
@@ -132,14 +137,26 @@ scale_colour_dutchmasters <- scale_color_dutchmasters
 #' @param ... additional arguments to pass to scale_color_gradientn
 #'
 #' @importFrom ggplot2 scale_fill_manual discrete_scale scale_fill_gradientn
-#'
 #' @export
-scale_fill_dutchmasters <- function(..., palette="milkmaid",
-                              discrete = TRUE, alpha=1, reverse = TRUE) {
+get_scale_fill <- function(palette_list,
+                           pal_object) {
+
+  check_valid_list(palette_list)
+  check_valid_color_list(palette_list)
+
+  function(...,
+           palette  = NULL,
+           discrete = TRUE,
+           alpha    = 1,
+           reverse  = TRUE) {
+
+    if (is.null(palette)) palette <- names(palette_list)[1]
+
     if (discrete) {
         discrete_scale("fill", "dutchmasters", palette=dutchmasters_pal(palette, alpha = alpha, reverse = reverse))
     }
     else {
         scale_fill_gradientn(colours = dutchmasters_pal(palette, alpha = alpha, reverse = reverse, ...)(256))
     }
+}
 }
