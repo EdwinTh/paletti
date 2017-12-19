@@ -32,3 +32,10 @@ check_valid_color_vec <- function(x) {
 check_valid_color_list <- function(x) {
   purrr::walk(x, check_valid_color_vec)
 }
+
+check_vec_has_names <- function(x) {
+  vec_names <- names(x)
+  if (is.null(vec_names) || any(vec_names == "")) {
+    stop("All elements should have names", call. = FALSE)
+  }
+}

@@ -4,7 +4,7 @@
 \alias{get_pal}
 \title{Create the _pal function for ramped colors}
 \usage{
-get_pal(pal_list)
+get_pal(palette_list)
 }
 \arguments{
 \item{palette_list}{The list that contains the character vectors with color

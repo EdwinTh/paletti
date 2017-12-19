@@ -2,11 +2,13 @@
 #'
 #' This wil create a function, that makes the palette with ramped colours.
 #'
-#' @param palette_list The list that contains the character vectors with color
-#' codes. List elements should be named.
+#' @param hex_object Either a character vector with hex code, or a list that
+#' contains the character vectors with hex codes. List elements should be
+#' named.
 #'
-#' @return A function that will create the ramped colors from one color vector
-#' in the list. The function has the following parameters:
+#' @return A function that will create the ramped colors from the color vector,
+#' or of one of the vectors in the list. The function has the following
+#' parameters:
 #'
 #' `palette`, a character that indicates which of the color vectors to use.
 #'
@@ -18,6 +20,13 @@
 #' # devtools::install_github("RopenScilabs/ochRe")
 #' # devtools::install_github("EdwinTh/dutchmasters")
 #'
+#' # use get_pal on a single character vector
+#' my_pal <- get_pal(c("#701B06", "#78A8D1", "#E3C78F"))
+#' filled.contour(volcano,
+#'                color.palette = my_pal(),
+#'                asp=1)
+#'
+#' # or on a list with multiple vectors
 #' ochRe_pal <- get_pal(ochRe::ochre_palettes)
 #' dutchmasters_pal <- get_pal(dutchmasters::dutchmasters)
 #'
@@ -29,26 +38,43 @@
 #'                color.palette = dutchmasters_pal("anatomy", reverse = TRUE),
 #'                asp=1)
 #' @export
-get_pal <- function(palette_list) {
-  check_valid_list(palette_list)
-  check_valid_color_list(palette_list)
+get_pal <- function(hex_object) {
 
-  function(palette = names(palette_list)[1],
-           alpha   = 1,
-           reverse = FALSE) {
-    pal <- palette_list[[palette]]
-    if (reverse){
-      pal <- rev(pal)
-    }
-    return(colorRampPalette(pal, alpha))
+  if (is.list(hex_object)) {
+    check_valid_list(hex_object)
+    check_valid_color_list(hex_object)
+  } else if (is.character(hex_object)) {
+    check_valid_color_vec(hex_object)
+  } else {
+    stop("hex_object should be either a list or a character vector",
+         call. = FALSE)
   }
 
+  if (is.list(hex_object)) {
+    function(palette = names(palette_list)[1],
+             alpha   = 1,
+             reverse = FALSE) {
+      pal <- hex_object[[palette]]
+      if (reverse){
+        pal <- rev(pal)
+      }
+      return(colorRampPalette(pal, alpha))
+    }
+  } else {
+    function(alpha   = 1,
+             reverse = FALSE) {
+      if (reverse){
+        hex_object <- rev(hex_object)
+      }
+      return(colorRampPalette(hex_object, alpha))
+    }
+  }
 }
 
-#' Create the scale_color_ function
+#' Create the scale_color_ and scale_fill_ functions
 #'
-#' This wil create the `scale_color_` function, to be applied in `ggplot2`. It
-#' sets up the color palette.
+#' This wil create the `scale_color_` and `scale_fill_` functions, to be applied
+#' in `ggplot2`. It sets up the color palettes.
 #'
 #' @param palette_list The list that contains the character vectors with color
 #' codes. List elements should be named.
@@ -123,21 +149,8 @@ get_scale_color <- function(palette_list,
 }
 
 get_scale_colour <- get_scale_color
-#' @rdname scale_color_dutchmasters
 
-
-#' Setup fill palette for ggplot2
-#'
-#' @param palette Choose from 'dutchmasters_palettes' list
-#'
-#' @inheritParams dutchmasters_pal
-#'
-#' @param discrete whether to use a discrete colour palette
-#'
-#' @param ... additional arguments to pass to scale_color_gradientn
-#'
-#' @importFrom ggplot2 scale_fill_manual discrete_scale scale_fill_gradientn
-#' @export
+#' @rdname get_scale_color
 get_scale_fill <- function(palette_list,
                            pal_object) {
 
@@ -153,10 +166,16 @@ get_scale_fill <- function(palette_list,
     if (is.null(palette)) palette <- names(palette_list)[1]
 
     if (discrete) {
-        discrete_scale("fill", "dutchmasters", palette=dutchmasters_pal(palette, alpha = alpha, reverse = reverse))
+        discrete_scale("fill",
+                       "thank_you_ochRe_team",
+                       palette = pal_object(palette,
+                                            alpha = alpha,
+                                            reverse = reverse))
+    } else {
+        scale_fill_gradientn(colours = dutchmasters_pal(palette,
+                                                        alpha = alpha,
+                                                        reverse = reverse,
+                                                        ...)(256))
+      }
     }
-    else {
-        scale_fill_gradientn(colours = dutchmasters_pal(palette, alpha = alpha, reverse = reverse, ...)(256))
-    }
-}
 }
