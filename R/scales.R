@@ -76,9 +76,9 @@ get_pal <- function(hex_object) {
 #' This wil create the `scale_color_` and `scale_fill_` functions, to be applied
 #' in `ggplot2`. It sets up the color palettes.
 #'
+#' @param pal_object The output of the `get_pal` function.
 #' @param palette_list The list that contains the character vectors with color
 #' codes. List elements should be named.
-#' @param pal_object The output of the `get_pal` function.
 #'
 #' @return A function that can be used to create color scale in an object of
 #'   class `ggplot2`. The function has the following parameters:
@@ -122,8 +122,19 @@ get_pal <- function(hex_object) {
 #' @export
 #'
 #' @importFrom ggplot2 discrete_scale scale_color_gradientn
-get_scale_color <- function(palette_list,
-                            pal_object) {
+get_scale_color <- function(pal_object,
+                            palette_list = NULL) {
+
+  if (!is.null(palette_list)) {
+    get_scale_color_list(pal_object,
+                         palette_list)
+  } else {
+    get_scale_color_vec(pal_object)
+  }
+}
+
+get_scale_color_list <- function(pal_object,
+                                 pallette_list) {
   check_valid_list(palette_list)
   check_valid_color_list(palette_list)
 
