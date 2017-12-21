@@ -43,31 +43,40 @@ get_pal <- function(hex_object) {
   if (is.list(hex_object)) {
     check_valid_list(hex_object)
     check_valid_color_list(hex_object)
-  } else if (is.character(hex_object)) {
-    check_valid_color_vec(hex_object)
-  } else {
-    stop("hex_object should be either a list or a character vector",
-         call. = FALSE)
-  }
 
-  if (is.list(hex_object)) {
-    function(palette = names(palette_list)[1],
-             alpha   = 1,
-             reverse = FALSE) {
-      pal <- hex_object[[palette]]
+    f <- function(palette,
+                  palette_list,
+                  alpha   = 1,
+                  reverse = FALSE) {
+      pal <- palette_list[[palette]]
       if (reverse){
         pal <- rev(pal)
       }
       return(colorRampPalette(pal, alpha))
     }
-  } else {
-    function(alpha   = 1,
-             reverse = FALSE) {
+    ret <- list(pal_func     = f,
+                palette_list = hex_object)
+    class(ret) <- "pal_list"
+    ret
+
+  } else if (is.character(hex_object)) {
+
+    check_valid_color_vec(hex_object)
+
+    f <- function(alpha   = 1,
+                  reverse = FALSE) {
       if (reverse){
         hex_object <- rev(hex_object)
       }
       return(colorRampPalette(hex_object, alpha))
     }
+    class(f) <- "pal_vec"
+    f
+
+  } else {
+
+    stop("hex_object should be either a list or a character vector",
+         call. = FALSE)
   }
 }
 
@@ -122,71 +131,85 @@ get_pal <- function(hex_object) {
 #' @export
 #'
 #' @importFrom ggplot2 discrete_scale scale_color_gradientn
-get_scale_color <- function(pal_object,
-                            palette_list = NULL) {
+get_scale_color <- function(pal_object) {
 
-  if (!is.null(palette_list)) {
-    get_scale_color_list(pal_object,
-                         palette_list)
+  if (inherits(pal_object, "pal_vec")) {
+    get_scale_vec(pal_object)
+  } else if (inherits(pal_object, "pal_list")) {
+    get_scale_list(pal_object)
   } else {
-    get_scale_color_vec(pal_object)
+    stop("`pal_object` should be of class 'pal_vec' or 'pal_list'")
   }
 }
 
-get_scale_color_list <- function(pal_object,
-                                 pallette_list) {
-  check_valid_list(palette_list)
-  check_valid_color_list(palette_list)
+get_scale_vec <- function(pal_object,
+                                scale_type = "colour") {
 
-  function(...,
-           palette  = NULL,
-           discrete = TRUE,
+  function(discrete = TRUE,
            alpha    = 1,
-           reverse  = FALSE) {
-    if (is.null(palette)) palette <- names(palette_list)[1]
+           reverse  = FALSE,
+           ...) {
     if (discrete) {
-      discrete_scale("colour",
+      discrete_scale(scale_type,
                      "thank_you_ochRe_team",
-                     palette = pal_object(palette,
-                                          alpha   = alpha,
+                     palette = pal_object(alpha   = alpha,
                                           reverse = reverse))
     } else {
-      scale_color_gradientn(colours = pal_object(palette,
-                                                 alpha   = alpha,
-                                                 reverse = reverse,
-                                                 ...)(256))
+      func <- ifelse(scale_type == "colour",
+                     scale_color_gradientn,
+                     scale_fill_gradientn)
+      func(colours = pal_object(alpha   = alpha,
+                                reverse = reverse,
+                                ...)(256))
     }
   }
+}
+
+get_scale_list <- function(pal_object,
+                           scale_type = "colour") {
+  palette_func <- pal_object$pal_func
+  palette_list <- pal_object$palette_list
+
+  function(palette  = NULL,
+           discrete = TRUE,
+           alpha    = 1,
+           reverse  = FALSE,
+           ...) {
+    if (is.null(palette)) palette <- names(palette_list)[1]
+
+
+    if (discrete) {
+      discrete_scale(scale_type,
+                     "thank_you_ochRe_team",
+                     palette = palette_func(palette      = palette,
+                                            palette_list = palette_list,
+                                            alpha   = alpha,
+                                            reverse = reverse))
+    } else {
+      func <- ifelse(scale_type == "colour",
+                     scale_color_gradientn,
+                     scale_fill_gradientn)
+      func(colours = pal_object(palette      = palette,
+                                palette_list = palette_list,
+                                alpha   = alpha,
+                                reverse = reverse,
+                                ...)(256))
+    }
+  }
+
 }
 
 get_scale_colour <- get_scale_color
 
 #' @rdname get_scale_color
-get_scale_fill <- function(palette_list,
-                           pal_object) {
+#' @export
+get_scale_fill <- function(pal_object) {
 
-  check_valid_list(palette_list)
-  check_valid_color_list(palette_list)
-
-  function(...,
-           palette  = NULL,
-           discrete = TRUE,
-           alpha    = 1,
-           reverse  = TRUE) {
-
-    if (is.null(palette)) palette <- names(palette_list)[1]
-
-    if (discrete) {
-        discrete_scale("fill",
-                       "thank_you_ochRe_team",
-                       palette = pal_object(palette,
-                                            alpha = alpha,
-                                            reverse = reverse))
-    } else {
-        scale_fill_gradientn(colours = dutchmasters_pal(palette,
-                                                        alpha = alpha,
-                                                        reverse = reverse,
-                                                        ...)(256))
-      }
-    }
+  if (inherits(pal_object, "pal_vec")) {
+    get_scale_vec(pal_object, "fill")
+  } else if (inherits(pal_object, "pal_list")) {
+    get_scale_list(pal_object, "fill")
+  } else {
+    stop("`pal_object` should be of class 'pal_vec' or 'pal_list'")
+  }
 }
