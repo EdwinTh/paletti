@@ -5,15 +5,15 @@
 \alias{get_scale_fill}
 \title{Create the scale_color_ and scale_fill_ functions}
 \usage{
-get_scale_color(palette_list, pal_object)
+get_scale_color(pal_object)
 
-get_scale_fill(palette_list, pal_object)
+get_scale_fill(pal_object)
 }
 \arguments{
+\item{pal_object}{The output of the `get_pal` function.}
+
 \item{palette_list}{The list that contains the character vectors with color
 codes. List elements should be named.}
-
-\item{pal_object}{The output of the `get_pal` function.}
 }
 \value{
 A function that can be used to create color scale in an object of

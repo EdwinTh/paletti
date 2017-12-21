@@ -4,15 +4,17 @@
 \alias{get_pal}
 \title{Create the _pal function for ramped colors}
 \usage{
-get_pal(palette_list)
+get_pal(hex_object)
 }
 \arguments{
-\item{palette_list}{The list that contains the character vectors with color
-codes. List elements should be named.}
+\item{hex_object}{Either a character vector with hex code, or a list that
+contains the character vectors with hex codes. List elements should be
+named.}
 }
 \value{
-A function that will create the ramped colors from one color vector
-in the list. The function has the following parameters:
+A function that will create the ramped colors from the color vector,
+or of one of the vectors in the list. The function has the following
+parameters:
 
 `palette`, a character that indicates which of the color vectors to use.
 
@@ -27,6 +29,13 @@ This wil create a function, that makes the palette with ramped colours.
 # devtools::install_github("RopenScilabs/ochRe")
 # devtools::install_github("EdwinTh/dutchmasters")
 
+# use get_pal on a single character vector
+my_pal <- get_pal(c("#701B06", "#78A8D1", "#E3C78F"))
+filled.contour(volcano,
+               color.palette = my_pal(),
+               asp=1)
+
+# or on a list with multiple vectors
 ochRe_pal <- get_pal(ochRe::ochre_palettes)
 dutchmasters_pal <- get_pal(dutchmasters::dutchmasters)
 
