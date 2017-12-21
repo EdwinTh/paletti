@@ -3,7 +3,7 @@ output: github_document
 ---
 
 Create your own color palettes and apply them in `ggplot2` in a breeze. All you
-have to do is deliver the hex codes from you company or maybe derived from your
+have to bring are the hex codes from you company or maybe derived from your
 favorite paintings? Based on the great work by the [ochRe team](https://github.com/ropenscilabs/ochRe). 
 
 Input is either a named `list` with palettes, or a single palette. (A palette
@@ -11,6 +11,9 @@ is a character vector with hex codes of the colors.) Use `viz_pallette` to view
 all the colors in a palette
 
 ```{r}
+# devtools::install_github("edwinth/paletti")
+library(paletti)
+library(ggplot2)
 viz_palette(ochre_palettes$lorikeet, "lorikeet colors")
 ```
 
@@ -57,11 +60,11 @@ my_company_cols
 mc_hex <- get_hex(my_company_cols)
 mc_hex(yellow, blue, red)
 
-staalmeesters_hex <- get_hex(dutchmasters$staalmeesters)
+voD_hex <- get_hex(dutchmasters$view_of_Delft)
 ggplot(mtcars, aes(as.character(cyl), fill = as.character(cyl))) +
   geom_bar()  +
-  scale_fill_manual(values = staalmeesters_hex(
-    red(tablecloth), black(cloak), skin
+  scale_fill_manual(values = voD_hex(
+    blue(sky), red(roofs2), yellow(quay)
   ))
 ```
 
