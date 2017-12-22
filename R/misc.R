@@ -39,3 +39,4 @@ check_vec_has_names <- function(x) {
     stop("All elements should have names", call. = FALSE)
   }
 }
+
